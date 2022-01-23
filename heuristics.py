@@ -13,8 +13,8 @@ class Heuristics:
 
     HEURISTIC_MULTIPLIER = {
         # gets more important with number of guesses made
-        "required_letter_count": lambda x: math.exp(x - 2),
-        "potential_letters_count": lambda x: math.exp(x - 2),
+        "required_letter_count": lambda x: math.exp(x - 4),
+        "potential_letters_count": lambda x: math.exp(x - 1),
         "bad_letters_count": lambda x: math.exp(x - 2),
         # gets less important with number of guesses made
         "unexplored_vowels_count": lambda x: math.exp(3 - x),
@@ -78,11 +78,16 @@ class Heuristics:
             self.heuristics["letter_frequency_score"] += base_letter_count / word_list_length
         self.heuristics["letter_frequency_score"] = self.heuristics["letter_frequency_score"] / len(self.word)
 
-    def compute_score(self, guess_num=0):
+    def compute_score(self, guess_num=1, strict_words=[]):
         score = 0
         for heur, value in self.heuristics.items():
             multiplier_func = self.HEURISTIC_MULTIPLIER.get(heur, lambda x: 1)
             weight = multiplier_func(guess_num) * self.HEURISTIC_WEIGHTS.get(heur, 1)
             # print(f"{heur}: {weight} * {value} = {weight * value}")
             score += weight * value
+        # if self.word in strict_words:
+        #     score *= (guess_num+5)/6
         return score
+
+
+# TODO: does not handle letter repetition well (ex: guessed two E, one green one black, will recommend words with two E's)

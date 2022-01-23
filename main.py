@@ -17,7 +17,6 @@ class WordleSolver:
 
     def __init__(self, word_list=[], word_length=5, guesses=6):
         print("Wordle Solver")
-
         self.word_list = word_list
         self.word_list_length = len(word_list)
         self.word_length = word_length
@@ -26,6 +25,16 @@ class WordleSolver:
         print(f"word_length: {word_length}")
         print(f"guesses: {guesses}")
 
+        play = True
+        while play:
+            # TODO: state leaks between loops
+            self.reset_game()
+            self.game_loop()
+            play = input(SEPARATOR+"Play again? (y/n): ").lower() in ["y", "yes"]
+
+        print("Bye")
+
+    def reset_game(self):
         word_list_letter_count = {}
         for word in word_list:
             idx = 0
@@ -35,14 +44,8 @@ class WordleSolver:
                 word_list_letter_count[idx] = letter_count
                 idx += 1
         self.word_list_letter_count = word_list_letter_count
+        self.game_state = GameState(word_length=self.word_length)
 
-        play = True
-        while play:
-            self.game_state = GameState(word_length=word_length)
-            self.game_loop()
-            play = input(SEPARATOR+"Play again? (y/n): ").lower() in ["y", "yes"]
-
-        print("Bye")
 
     def game_loop(self):
         for guess_num in range(self.guesses):
@@ -72,6 +75,7 @@ class WordleSolver:
     def suggest_words(self, guess_num=1):
         # TODO: check ignore_solution
         possible_words = self.game_state.possible_words(self.word_list, ignore_solution=(guess_num <= 4))
+        strict_words = self.game_state.possible_words(self.word_list)
 
         score = {}
         for word in possible_words:
@@ -89,7 +93,7 @@ class WordleSolver:
             # missing_vowels_count
             heuristics.count_unexplored_vowels(self.game_state.unexplored_letters)
             # print(f"Computing score for word: {word}")
-            score[word] = heuristics.compute_score(guess_num=guess_num)
+            score[word] = heuristics.compute_score(guess_num=guess_num, strict_words=strict_words)
 
         ordered_score = {
             k: v for k, v in sorted(score.items(), key=lambda item: item[1])
@@ -97,10 +101,11 @@ class WordleSolver:
         print("\nWords orered by score:" + SEPARATOR)
         for word, score in ordered_score.items():
             print(f"{word}: {score}")
-        strict_words = self.game_state.possible_words(self.word_list)
         if len(strict_words) < 500:
             print("\nStrictly possible words: "+ SEPARATOR)
-            print(self.game_state.possible_words(self.word_list))
+            for word, score in ordered_score.items():
+                if word in strict_words:
+                    print(f"{word}: {ordered_score[word]}")
 
 if __name__ == "__main__":
     # Load all words

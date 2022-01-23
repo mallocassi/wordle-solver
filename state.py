@@ -59,9 +59,9 @@ class GameState:
         return solution
 
     def update(self, guess, results):
-        print(f"Updating Game State with guess={guess} and results={results}")
-        print("Before update")
-        self.print()
+        # print(f"Updating Game State with guess={guess} and results={results}")
+        # print("Before update")
+        # self.print()
         for idx in range(self.word_length):
             try:
                 letter = guess[idx]
@@ -86,8 +86,8 @@ class GameState:
             elif result == "2":
                 # add to solution
                 self.add_valid_letter(letter, idx)
-        self.print()
-        input("After update")
+        # self.print()
+        # input("After update")
 
     def all_valid_letters(self):
         return filter(lambda x: x not in self.bad_letters, ALL_LETTERS)
