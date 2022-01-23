@@ -153,3 +153,9 @@ class GameState:
         for _, letters in self.solution.items():
             all_potential_letters.extend(letters)
         return list(set(all_potential_letters))
+
+    def unexplored_vowels(self):
+        return [
+            letter for letter in ["a", "e", "i", "o", "u", "y"]
+            if letter in self.unexplored_letters
+        ]
