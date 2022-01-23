@@ -50,8 +50,10 @@ class WordleSolver:
             # update game state
             error = True
             while error:
-                print(f"\n\nGuessing word {guess_num}")
+                # suggest words
+                self.suggest_words(guess_num=guess_num)
                 # ask for results
+                print(f"\n\nGuessing word {guess_num}")
                 guess = input(ASK_FOR_GUESS).strip().lower()
                 results = input(ASK_FOR_RESULTS).replace(" ", "")
                 if self.is_win(results):
@@ -62,8 +64,6 @@ class WordleSolver:
                     error = False
                 except IndexError as ex:
                     print(f"\n\nERROR: {ex}")
-            # suggest words
-            self.suggest_words(guess_num=guess_num)
         print("Woops")
 
     def is_win(self, results):
@@ -71,9 +71,7 @@ class WordleSolver:
 
     def suggest_words(self, guess_num=1):
         # TODO: check ignore_solution
-        possible_words = self.game_state.possible_words(self.word_list, ignore_solution=(guess_num <= 3))
-        print(f"\n\nAll possible words: {SEPARATOR}")
-        print(", ".join(possible_words))
+        possible_words = self.game_state.possible_words(self.word_list, ignore_solution=(guess_num <= 4))
 
         score = {}
         for word in possible_words:
@@ -82,15 +80,15 @@ class WordleSolver:
             heuristics.count_letter_frequency_score(self.word_list_letter_count, self.word_list_length)
             # potential_letters_count
             heuristics.count_potential_letters(self.game_state.potential_letters)
-            # potential_letters_count
-            heuristics.count_missing_required(self.game_state.solution)
+            # required_letter_count
+            heuristics.count_required_letters(self.game_state.solution, self.game_state.unexplored_letters)
             # bad_letters_count
             heuristics.count_bad_letters(self.game_state.bad_letters)
             # unexplored_letters_count
             heuristics.count_unexplored_letters(self.game_state.unexplored_letters)
             # missing_vowels_count
             heuristics.count_unexplored_vowels(self.game_state.unexplored_letters)
-            print(f"Computing score for word: {word}")
+            # print(f"Computing score for word: {word}")
             score[word] = heuristics.compute_score(guess_num=guess_num)
 
         ordered_score = {
@@ -99,7 +97,10 @@ class WordleSolver:
         print("\nWords orered by score:" + SEPARATOR)
         for word, score in ordered_score.items():
             print(f"{word}: {score}")
-
+        strict_words = self.game_state.possible_words(self.word_list)
+        if len(strict_words) < 500:
+            print("\nStrictly possible words: "+ SEPARATOR)
+            print(self.game_state.possible_words(self.word_list))
 
 if __name__ == "__main__":
     # Load all words

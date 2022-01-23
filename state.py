@@ -107,12 +107,12 @@ class GameState:
             invalid = False
             if not self.valid_word(word) and not ignore_solution:
                 invalid = True
-                break
+                continue
             if not invalid and not ignore_solution:
                 for idx, letter in self.solution.items():
                     if letter != [] and word[idx] != letter:
                         invalid = True
-                        break
+                        continue
             if not invalid:
                 possible_words.append(word)
         return possible_words
@@ -130,7 +130,9 @@ class GameState:
 
     def add_potential_letter(self, letter, found_at):
         try:
-            self.potential_letters[found_at] = list(set(self.potential_letters[found_at])).remove(letter)
+            tmp = list(set(self.potential_letters[found_at]))
+            tmp.remove(letter)
+            self.potential_letters[found_at] = tmp
         except ValueError:
             pass
         # add to misplaced letters

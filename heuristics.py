@@ -3,7 +3,7 @@ import math
 class Heuristics:
 
     HEURISTIC_WEIGHTS = {
-        "missing_required_letter_count": -1,
+        "required_letter_count": 1,
         "potential_letters_count": 1,
         "unexplored_letters_count": 2,
         "unexplored_vowels_count": 10,
@@ -13,21 +13,21 @@ class Heuristics:
 
     HEURISTIC_MULTIPLIER = {
         # gets more important with number of guesses made
-        "missing_required_letter_count": lambda x: math.exp(x - 2),
-        "potential_letters_count": lambda x: math.exp(x),
+        "required_letter_count": lambda x: math.exp(x - 2),
+        "potential_letters_count": lambda x: math.exp(x - 2),
         "bad_letters_count": lambda x: math.exp(x - 2),
         # gets less important with number of guesses made
-        "unexplored_vowels_count": lambda x: math.exp(2 - x),
+        "unexplored_vowels_count": lambda x: math.exp(3 - x),
         # slowly increase in importance
         "letter_frequency_score": lambda x: math.sqrt(x),
         # fixed importance
-        "unexplored_letters_count":  lambda x: 10,
+        "unexplored_letters_count":  lambda x: 1,
     }
 
     def __init__(self, word):
         self.word = word
         self.heuristics = {
-            "missing_required_letter_count": 0,
+            "required_letter_count": 0,
             "potential_letters_count": 0,
             "bad_letters_count": 0,
             "unexplored_vowels_count": 0,
@@ -35,10 +35,10 @@ class Heuristics:
             "unexplored_letters_count": 0,
         }
 
-    def count_missing_required(self, required_letters_by_index):
+    def count_required_letters(self, required_letters_by_index, unexplored_letters):
         for idx, required_letter in required_letters_by_index.items():
-            if self.word[idx] != required_letter:
-                self.heuristics["missing_required_letter_count"] += 1
+            if self.word[idx] == required_letter:
+                self.heuristics["required_letter_count"] += 1
 
     def count_potential_letters(self, potential_letters_by_index):
         for idx, potential_letters in potential_letters_by_index.items():
@@ -83,6 +83,6 @@ class Heuristics:
         for heur, value in self.heuristics.items():
             multiplier_func = self.HEURISTIC_MULTIPLIER.get(heur, lambda x: 1)
             weight = multiplier_func(guess_num) * self.HEURISTIC_WEIGHTS.get(heur, 1)
-            print(f"{heur}: {weight} * {value} = {weight * value}")
+            # print(f"{heur}: {weight} * {value} = {weight * value}")
             score += weight * value
         return score
